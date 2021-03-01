@@ -19,23 +19,55 @@ pause_state = False
 shuffle_state = [False, []]
 
 def getuser(name):
+    if not name:
+        showinfo("Window", "Enter name")
+        name_entry.delete(0,END)
+        return
+
     query = {"name": name}
+    if not col.count_documents(query):
+        showinfo("Window", "User not found")
+        name_entry.delete(0,END)
+        return
     details = col.find(query)
     userplaylist = []
     for i in details:
         userplaylist.extend(i['myplaylist'])
-    if not userplaylist:
+    Clearplaylist()
+    for song in userplaylist:
+        playground.insert(END,str(song))
+
+def updateuser(name):
+    if not name:
+        showinfo("Window", "Enter name")
+        name_entry.delete(0,END)
+        return
+    filter = {'name':name}
+    if not col.count_documents(filter):
         showinfo("Window", "User not found")
         name_entry.delete(0,END)
         return
-    else:
-        Clearplaylist()
-        for song in userplaylist:
+    userplaylist = list(playground.get(0,END))
+    query = { "$set" : {"myplaylist": userplaylist}}
+    col.update_one(filter, query)
 
-            playground.insert(END,str(song))
+def storeuser(name):
+    if not name:
+        showinfo("Window", "Enter name")
+        name_entry.delete(0,END)
+        return
+    query = {"name": name}
+    if col.count_documents(query):
+        showinfo("Window", "User already exists")
+        name_entry.delete(0,END)
+        return
+    userplaylist = list(playground.get(0,END))
+    if not userplaylist:
+        showinfo("Window", "Please provide atlease one song")
+        name_entry.delete(0,END)
+        return
 
-def storeuser(name, songslist):
-    user = {"name": name, "myplaylist": songslist}
+    user = {"name": name, "myplaylist": userplaylist }
     x = col.insert_one(user)
 
 
@@ -290,7 +322,11 @@ name_entry = Entry(imagespace2)
 name_entry.grid(row=7, column=4)
 
 bt = Button(imagespace2, text="Load Playlist", command=lambda :getuser(name_entry.get()))
-bt.grid(row=7, column=5)
+bt.grid(row=8, column=2)
+bt1 = Button(imagespace2, text="Update Playlist", command=lambda :updateuser(name_entry.get()))
+bt1.grid(row=8, column=4)
+bt2 = Button(imagespace2, text="Store Playlist", command=lambda :storeuser(name_entry.get()))
+bt2.grid(row=8, column=6)
 
 menu1=Menu(loop)
 loop.config(menu=menu1) # sort of like main menu widget
