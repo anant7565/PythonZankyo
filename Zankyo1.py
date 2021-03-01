@@ -6,11 +6,39 @@ import pygame
 import random
 from tkinter.messagebox import showinfo
 from requests.exceptions import Timeout
+import pymongo
+
+
 
 loop=Tk()
 
+myclt = pymongo.MongoClient("localhost",27017)
+mydb = myclt["music"]
+col = mydb["users"]
 pause_state = False
 shuffle_state = [False, []]
+
+def getuser(name):
+    query = {"name": name}
+    details = col.find(query)
+    userplaylist = []
+    for i in details:
+        userplaylist.extend(i['myplaylist'])
+    if not userplaylist:
+        showinfo("Window", "User not found")
+        name_entry.delete(0,END)
+        return
+    else:
+        Clearplaylist()
+        for song in userplaylist:
+
+            playground.insert(END,str(song))
+
+def storeuser(name, songslist):
+    user = {"name": name, "myplaylist": songslist}
+    x = col.insert_one(user)
+
+
 
 def onselect(evt):
 
@@ -119,8 +147,7 @@ def playinLoop(songslist):
 
 def popup_showinfo(message):
     showinfo("Window", message)
-    e2.delete(0,END)
-    e1.delete(0,END)
+
 
 def printlyrics(song):
     win =Toplevel()
@@ -140,6 +167,8 @@ def getlyrics(artist, song):
         popup_showinfo('Please fill the information')
         return
 
+    e2.delete(0,END)
+    e1.delete(0,END)
 
     try:
         x= requests.get('https://api.lyrics.ovh/v1/'+artist + '/' + song,timeout=5)
@@ -243,8 +272,8 @@ shufbt.grid(row=0,column=5)
 imagespace1=Frame(loop)
 imagespace1.pack()
 
-l = Label(imagespace1, text="Artist Name").grid(row=4, column = 1)
-k = Label(imagespace1, text="Song Name").grid(row=4, column = 3)
+an = Label(imagespace1, text="Artist Name:").grid(row=4, column = 1)
+sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 3)
 e1 = Entry(imagespace1)
 e2 = Entry(imagespace1)
 
@@ -252,6 +281,16 @@ e1.grid(row=4, column=2)
 e2.grid(row=4, column=4)
 b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e1.get(), e2.get()))
 b.grid(row=4, column=5)
+
+imagespace2=Frame(loop)
+imagespace2.pack()
+name = Label(imagespace2, text="Name:").grid(row=7, column = 1)
+
+name_entry = Entry(imagespace2)
+name_entry.grid(row=7, column=4)
+
+bt = Button(imagespace2, text="Load Playlist", command=lambda :getuser(name_entry.get()))
+bt.grid(row=7, column=5)
 
 menu1=Menu(loop)
 loop.config(menu=menu1) # sort of like main menu widget
