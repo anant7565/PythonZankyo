@@ -1,12 +1,25 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import ttk
+import requests
 import pygame
 import random
+from tkinter.messagebox import showinfo
+from requests.exceptions import Timeout
 
 loop=Tk()
 
 pause_state = False
 shuffle_state = [False, []]
+
+def onselect(evt):
+
+    w = evt.widget
+    index = int(w.curselection()[0])
+    value = w.get(index)
+    e2.delete(0,END)
+    e2.insert(0,value)
+
 
 def addsongs():
     addedsongs= filedialog.askopenfilenames(initialdir="\Audio",title="Pick Song",filetypes=(("mp3 Files","*.mp3"),))
@@ -101,7 +114,38 @@ def playinLoop(songslist):
         playground.selection_set(i, last = None)
         playsong()
 
+def popup_showinfo(message):
+    showinfo("Window", message)
+    e2.delete(0,END)
+    e1.delete(0,END)
 
+def printlyrics(song):
+    win =Toplevel()
+    win.geometry("500x500")
+    win.wm_title("Window")
+    T = Text(win)
+    S = Scrollbar(win,command=T.yview)
+
+    T.config(yscrollcommand=S.set)
+
+    T.grid(row = 3, column = 1)
+    T.insert(END, song)
+
+def getlyrics(artist, song):
+
+    if (not artist) or (not song):
+        popup_showinfo('Please fill the information')
+        return
+
+
+    try:
+        x= requests.get('https://api.lyrics.ovh/v1/'+artist + '/' + song,timeout=5)
+    except:
+        popup_showinfo('No lyrics found')
+        return
+    else:
+
+        printlyrics(x.json()['lyrics'])
 def Rem1():
     playground.delete(playground.curselection()[0])
     pygame.mixer.music.stop()
@@ -167,6 +211,7 @@ loop.iconbitmap("Graphics/ZankyoIcon2.ico")
 loop.geometry("500x400")
 loop.configure(bg="#F3872F")
 playground=Listbox(loop,bg='#ffcc99',fg="#000000",width=80,bd=5,selectbackground="#ff944d",selectforeground="#000000")
+playground.bind('<<ListboxSelect>>', onselect)
 playground.pack(pady=10)
 pygame.mixer.init()
 playimg=PhotoImage(file="Graphics/Playb.png")
@@ -175,7 +220,7 @@ nextimg=PhotoImage(file="Graphics/Nextb.png")
 previmg=PhotoImage(file="Graphics/Prevb.png")
 stopimg=PhotoImage(file="Graphics/Stopb.png")
 
-imagespace=Frame(loop)
+imagespace=Frame(loop,height = 2)
 imagespace.pack()
 playbt=Button(imagespace,image=playimg,borderwidth=0,bg="#F3872F",command=playsong)
 pausebt=Button(imagespace,image=pauseimg,borderwidth=0,bg="#F3872F",command=pausesong)
@@ -183,12 +228,27 @@ prevbt=Button(imagespace,image=previmg,borderwidth=0,bg="#F3872F",command=previo
 nextbt=Button(imagespace,image=nextimg,borderwidth=0,bg="#F3872F",command=nextSong)
 stopbt=Button(imagespace,image=stopimg,borderwidth=0,bg="#F3872F",command=stopsong)
 shufbt=Button(imagespace,text = "Shuffle and relax",borderwidth=0,bg="#F3872F",command=shuffle)
+
+
 prevbt.grid(row=0,column=0)
 playbt.grid(row=0,column=1)
 pausebt.grid(row=0,column=2)
 stopbt.grid(row=0,column=3)
 nextbt.grid(row=0,column=4)
 shufbt.grid(row=0,column=5)
+
+imagespace1=Frame(loop)
+imagespace1.pack()
+
+l = Label(imagespace1, text="Artist Name").grid(row=4, column = 1)
+k = Label(imagespace1, text="Song Name").grid(row=4, column = 3)
+e1 = Entry(imagespace1)
+e2 = Entry(imagespace1)
+
+e1.grid(row=4, column=2)
+e2.grid(row=4, column=4)
+b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e1.get(), e2.get()))
+b.grid(row=4, column=5)
 
 menu1=Menu(loop)
 loop.config(menu=menu1) # sort of like main menu widget
