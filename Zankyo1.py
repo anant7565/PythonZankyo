@@ -18,7 +18,7 @@ def onselect(evt):
     index = int(w.curselection()[0])
     value = w.get(index)
     e2.delete(0,END)
-    e2.insert(0,value)
+    e2.insert(END,value)
 
 
 def addsongs():
@@ -30,6 +30,8 @@ def addsongs():
 def playsong():
     song = playground.get(ACTIVE)
     playground.selection_set(ACTIVE, last = None)
+    e2.delete(0,END)
+    e2.insert(END,song)
     song = '/Users/pramodkhandelwal/github/PythonZankyo/Audio/' + song + '.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops = 0)
@@ -37,6 +39,7 @@ def playsong():
 def stopsong():
     pygame.mixer.music.stop()
     playground.selection_clear(ACTIVE)
+    e2.delete(0,END)
     playground.activate(0)
 
 
