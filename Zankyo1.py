@@ -5,6 +5,7 @@ import requests
 import pygame
 import random
 from tkinter.messagebox import showinfo
+from lyrics_extractor import SongLyrics
 from requests.exceptions import Timeout
 import pymongo
 
@@ -193,23 +194,23 @@ def printlyrics(song):
     T.grid(row = 3, column = 1)
     T.insert(END, song)
 
-def getlyrics(artist, song):
-
-    if (not artist) or (not song):
+def getlyrics(song):
+    extract_lyrics = SongLyrics("AIzaSyB_2KRVPtP7AxWwTxKC4C9UecXbQTMASr4","1bf00c72a4acb9c4a")
+    if (not song):
         popup_showinfo('Please fill the information')
         return
 
     e2.delete(0,END)
-    e1.delete(0,END)
+
 
     try:
-        x= requests.get('https://api.lyrics.ovh/v1/'+artist + '/' + song,timeout=5)
+        l = extract_lyrics.get_lyrics(song)
     except:
         popup_showinfo('No lyrics found')
         return
     else:
 
-        printlyrics(x.json()['lyrics'])
+        printlyrics(l['lyrics'])
 def Rem1():
     playground.delete(playground.curselection()[0])
     pygame.mixer.music.stop()
@@ -304,14 +305,14 @@ shufbt.grid(row=0,column=5)
 imagespace1=Frame(loop)
 imagespace1.pack()
 
-an = Label(imagespace1, text="Artist Name:").grid(row=4, column = 1)
+
 sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 3)
-e1 = Entry(imagespace1)
+
 e2 = Entry(imagespace1)
 
-e1.grid(row=4, column=2)
+
 e2.grid(row=4, column=4)
-b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e1.get(), e2.get()))
+b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e2.get()))
 b.grid(row=4, column=5)
 
 imagespace2=Frame(loop)
