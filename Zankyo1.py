@@ -8,7 +8,35 @@ from tkinter.messagebox import showinfo
 from lyrics_extractor import SongLyrics
 from requests.exceptions import Timeout
 import pymongo
+import json
+import urllib
+import base64
+from io import BytesIO
+from PIL import ImageTk, Image
 
+CLIENT_ID = 'eab56b94c3e8449794b46717080609b9'
+CLIENT_SECRET = 'bd23f78d31fb4c7bbdda106db8484151'
+
+AUTH_URL = 'https://accounts.spotify.com/api/token'
+
+
+auth_response = requests.post(AUTH_URL, {
+    'grant_type': 'client_credentials',
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+})
+
+
+auth_response_data = auth_response.json()
+
+
+access_token = auth_response_data['access_token']
+
+
+headers = {
+    'Authorization': 'Bearer {token}'.format(token=access_token)
+}
+BASE_URL = 'https://api.spotify.com/v1/search/'
 
 
 loop=Tk()
@@ -18,6 +46,9 @@ mydb = myclt["music"]
 col = mydb["users"]
 pause_state = False
 shuffle_state = [False, []]
+
+
+
 
 def getuser(name):
     if not name:
@@ -82,6 +113,7 @@ def onselect(evt):
     e2.insert(END,value)
 
 
+
 def addsongs():
     addedsongs= filedialog.askopenfilenames(initialdir="\Audio",title="Pick Song",filetypes=(("mp3 Files","*.mp3"),))
     for song in addedsongs:
@@ -93,6 +125,7 @@ def playsong():
     playground.selection_set(ACTIVE, last = None)
     e2.delete(0,END)
     e2.insert(END,song)
+
     song = '/Users/pramodkhandelwal/github/PythonZankyo/Audio/' + song + '.mp3'
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops = 0)
@@ -102,6 +135,7 @@ def stopsong():
     playground.selection_clear(ACTIVE)
     e2.delete(0,END)
     playground.activate(0)
+    imagespace3.pack_forget()
 
 
 
@@ -182,35 +216,84 @@ def popup_showinfo(message):
     showinfo("Window", message)
 
 
-def printlyrics(song):
+def printlyrics(code,arr,song = 'NO LYRICS FOUND'):
     win =Toplevel()
-    win.geometry("500x500")
-    win.wm_title("Window")
+    win.geometry("1500x500")
+    win.wm_title('Window')
     T = Text(win)
     S = Scrollbar(win,command=T.yview)
 
     T.config(yscrollcommand=S.set)
 
-    T.grid(row = 3, column = 1)
+    T.pack(side = LEFT)
+
     T.insert(END, song)
 
+
+
+    URL = arr[0]
+
+    response = requests.get(URL)
+
+    im = Image.open(BytesIO(response.content))
+    photo = ImageTk.PhotoImage(im)
+
+    label = Label(win,image=photo)
+    label.image = photo
+    label.pack()
+
+    Label(win, text = arr[1]).pack()
+
+    Label(win, text = arr[2]).pack()
+    Label(win, text = arr[3]).pack()
+    Label(win, text = 'Top albums by the artist').pack()
+    for i in range(len(arr[4])):
+        Label(win, text = arr[4][i]).pack()
+
+
+
+
 def getlyrics(song):
-    extract_lyrics = SongLyrics("AIzaSyB_2KRVPtP7AxWwTxKC4C9UecXbQTMASr4","1bf00c72a4acb9c4a")
+
     if (not song):
         popup_showinfo('Please fill the information')
         return
 
     e2.delete(0,END)
+    extract_lyrics = SongLyrics("AIzaSyB_2KRVPtP7AxWwTxKC4C9UecXbQTMASr4","1bf00c72a4acb9c4a")
+
+    song = song
+    spotify = requests.get(BASE_URL,params={'q': song, 'limit': 1, 'type': 'track'}, headers=headers)
+    spotify_response = spotify.json()
+    itunes = 'https://itunes.apple.com/search?term='+ song +'&limit=1'
+    itunes_response= requests.get(itunes).json()
+    artist_image = spotify_response['tracks']['items'][0]['album']['images'][1]["url"]
+
+    c = 'https://itunes.apple.com/lookup?id='+str(itunes_response['results'][0]["artistId"])+'&entity=album'
+    d= requests.get(c).json()
+
+    artist_name = itunes_response['results'][0]['artistName']
+    a_sl ='Top tracks on Spotify: ' +spotify_response['tracks']['items'][0]['album']['artists'][0]["external_urls"]['spotify']
+    a_al ='Top tracks on Apple Music: ' +itunes_response['results'][0]["artistViewUrl"]
+    l = []
+    for i in range(1,5):
+        l.append(d['results'][i]["collectionName"] + ' : ' + d['results'][i]["collectionViewUrl"] )
+    arr = [artist_image, artist_name, a_sl, a_al,l]
+
+
+
+
+
 
 
     try:
         l = extract_lyrics.get_lyrics(song)
     except:
         popup_showinfo('No lyrics found')
-        return
+        printlyrics(0,arr)
     else:
 
-        printlyrics(l['lyrics'])
+        printlyrics(1,arr,l['lyrics'])
 def Rem1():
     playground.delete(playground.curselection()[0])
     pygame.mixer.music.stop()
@@ -302,18 +385,6 @@ stopbt.grid(row=0,column=3)
 nextbt.grid(row=0,column=4)
 shufbt.grid(row=0,column=5)
 
-imagespace1=Frame(loop)
-imagespace1.pack()
-
-
-sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 3)
-
-e2 = Entry(imagespace1)
-
-
-e2.grid(row=4, column=4)
-b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e2.get()))
-b.grid(row=4, column=5)
 
 imagespace2=Frame(loop)
 imagespace2.pack()
@@ -328,6 +399,24 @@ bt1 = Button(imagespace2, text="Update Playlist", command=lambda :updateuser(nam
 bt1.grid(row=8, column=4)
 bt2 = Button(imagespace2, text="Store Playlist", command=lambda :storeuser(name_entry.get()))
 bt2.grid(row=8, column=6)
+imagespace1=Frame(loop)
+imagespace1.pack()
+
+
+sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 3)
+
+e2 = Entry(imagespace1)
+
+
+e2.grid(row=4, column=4)
+b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e2.get()))
+b.grid(row=4, column=5)
+
+
+
+
+
+
 
 menu1=Menu(loop)
 loop.config(menu=menu1) # sort of like main menu widget
