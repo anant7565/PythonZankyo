@@ -128,7 +128,7 @@ def playsong():
     global pause_state 
     global songlen
     global currpos
-    global shiftit
+    
     if(pause_state):  
         pygame.mixer.music.unpause()
         pause_state=False
@@ -144,7 +144,8 @@ def playsong():
         else:
             lentime.config(text=f'{m1}:0{s1}')
         def timemysong():
-            
+            global currpos
+            global shiftit
             currpos=int(pygame.mixer.music.get_pos()/1000)
             shiftit=currpos/songlen*100
             timescrub.configure(value=shiftit)
@@ -156,7 +157,10 @@ def playsong():
             postime.after(1000,timemysong)
         
         timemysong()
+     
         pygame.mixer.music.play(loops = 0)
+       
+
 
 def stopsong():
     pygame.mixer.music.stop()
@@ -333,12 +337,12 @@ def Clearplaylist():
 def Themesetter(scrubFrame,shufbt,imagespace,imagespace1,imagespace2,loop,masterFrame,volumeFrame,playground,playbt,pausebt,nextbt,prevbt,stopbt,postime,lentime,colscheme):
     if colscheme=="MONOCHROME":
         loop.configure(bg="#454545")
-        playground.config(bg="#999999",fg="#ffffff",selectbackground="#707070",selectforeground="#ffffff")
-        playbt.config(bg="#999999")
-        pausebt.config(bg="#999999")
-        prevbt.config(bg="#999999")
-        nextbt.config(bg="#999999")
-        stopbt.config(bg="#999999")
+        playground.config(bg="#000000",fg="#ffffff",selectbackground="#303030",selectforeground="#ffffff")
+        playbt.config(bg="#454545")
+        pausebt.config(bg="#454545")
+        prevbt.config(bg="#454545")
+        nextbt.config(bg="#454545")
+        stopbt.config(bg="#454545")
         postime.config(bg="#454545",fg="#ffffff")
         lentime.config(bg="#454545",fg="#ffffff")
         masterFrame.configure(bg="#454545")
@@ -346,7 +350,7 @@ def Themesetter(scrubFrame,shufbt,imagespace,imagespace1,imagespace2,loop,master
         imagespace.configure(bg="#454545")
         imagespace1.configure(bg="#454545")
         imagespace2.configure(bg="#454545")
-        shufbt.configure(bg="#999999")
+        shufbt.configure(bg="#454545")
         scrubFrame.configure(bg="#454545")
 
 
@@ -369,40 +373,40 @@ def Themesetter(scrubFrame,shufbt,imagespace,imagespace1,imagespace2,loop,master
         scrubFrame.configure(bg="#20c3d0")
 
     if colscheme=="Autumn Leaves" :
-        loop.configure(bg="#98482b")
-        playground.config(bg="#a64b29",fg="#ffffff",selectbackground="#853619",selectforeground="#ffffff")
-        playbt.config(bg="#98482b")
-        pausebt.config(bg="#98482b")
-        prevbt.config(bg="#98482b")
-        nextbt.config(bg="#98482b")
-        stopbt.config(bg="#98482b")
-        postime.config(bg="#98482b",fg="#ffffff")
-        lentime.config(bg="#98482b",fg="#ffffff")
-        masterFrame.configure(bg="#98482b")
-        volumeFrame.configure(bg="#98482b")
-        imagespace.configure(bg="#98482b")
-        imagespace1.configure(bg="#98482b")
-        imagespace2.configure(bg="#98482b")
-        shufbt.config(bg="#98482b")
-        scrubFrame.configure(bg="#98482b")
+        loop.configure(bg="#FF4E50")
+        playground.config(bg="#FFAAA6",fg="#ffffff",selectbackground="#FF4E50",selectforeground="#ffffff")
+        playbt.config(bg="#FF4E50")
+        pausebt.config(bg="#FF4E50")
+        prevbt.config(bg="#FF4E50")
+        nextbt.config(bg="#FF4E50")
+        stopbt.config(bg="#FF4E50")
+        postime.config(bg="#FF4E50",fg="#ffffff")
+        lentime.config(bg="#FF4E50",fg="#ffffff")
+        masterFrame.configure(bg="#FF4E50")
+        volumeFrame.configure(bg="#FF4E50")
+        imagespace.configure(bg="#FF4E50")
+        imagespace1.configure(bg="#FF4E50")
+        imagespace2.configure(bg="#FF4E50")
+        shufbt.config(bg="#FF4E50")
+        scrubFrame.configure(bg="#FF4E50")
 
     if colscheme=="Spring" :
-        loop.configure(bg="#54862e")
-        playground.config(bg="#9ac37b",fg="#ffffff",selectbackground="#72a24e",selectforeground="#ffffff")
-        playbt.config(bg="#54862e")
-        pausebt.config(bg="#54862e")
-        prevbt.config(bg="#54862e")
-        nextbt.config(bg="#54862e")
-        stopbt.config(bg="#54862e")
-        postime.config(bg="#54862e",fg="#ffffff")
-        lentime.config(bg="#54862e",fg="#ffffff")
-        masterFrame.configure(bg="#54862e")
-        volumeFrame.configure(bg="#54862e")
-        imagespace.configure(bg="#54862e")
-        imagespace1.configure(bg="#54862e")
-        imagespace2.configure(bg="#54862e")
-        shufbt.config(bg="#54862e")
-        scrubFrame.configure(bg="#54862e")
+        loop.configure(bg="#A8E6CE")
+        playground.config(bg="#DCEDC2",fg="#000000",selectbackground="#A8E6CE",selectforeground="#ffffff")
+        playbt.config(bg="#A8E6CE")
+        pausebt.config(bg="#A8E6CE")
+        prevbt.config(bg="#A8E6CE")
+        nextbt.config(bg="#A8E6CE")
+        stopbt.config(bg="#A8E6CE")
+        postime.config(bg="#A8E6CE",fg="#ffffff")
+        lentime.config(bg="#A8E6CE",fg="#ffffff")
+        masterFrame.configure(bg="#A8E6CE")
+        volumeFrame.configure(bg="#A8E6CE")
+        imagespace.configure(bg="#A8E6CE")
+        imagespace1.configure(bg="#A8E6CE")
+        imagespace2.configure(bg="#A8E6CE")
+        shufbt.config(bg="#A8E6CE")
+        scrubFrame.configure(bg="#A8E6CE")
 
     if colscheme=="Summer" :
         loop.configure(bg="#F3872F")
@@ -434,9 +438,8 @@ def scrub(x):
     global shiftit
     toset=timescrub.get()*songlen/100
     shiftit=toset*100
-    timescrub.configure(value=shiftit)
+    # timescrub.configure(value=shiftit)
     pygame.mixer.music.set_pos(toset)
-    pass
     
 
 
@@ -487,30 +490,30 @@ shufbt.grid(row=0,column=5)
 imagespace2=Frame(loop)
 imagespace2.configure(bg="#F3872F")
 imagespace2.pack()
-name = Label(imagespace2, text="Name:").grid(row=7, column = 1)
+name = Label(imagespace2, text="Name:").grid(row=7, column = 0)
 
 name_entry = Entry(imagespace2)
-name_entry.grid(row=7, column=4)
+name_entry.grid(row=7, column=2)
 
 bt = Button(imagespace2, text="Load Playlist", command=lambda :getuser(name_entry.get()))
-bt.grid(row=8, column=2)
+bt.grid(row=8, column=0)
 bt1 = Button(imagespace2, text="Update Playlist", command=lambda :updateuser(name_entry.get()))
-bt1.grid(row=8, column=4)
+bt1.grid(row=8, column=2)
 bt2 = Button(imagespace2, text="Store Playlist", command=lambda :storeuser(name_entry.get()))
-bt2.grid(row=8, column=6)
+bt2.grid(row=8, column=4)
 imagespace1=Frame(loop)
 imagespace1.configure(bg="#F3872F")
 imagespace1.pack()
 
 
-sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 3)
+sn = Label(imagespace1, text="Song Name:").grid(row=4, column = 0)
 
 e2 = Entry(imagespace1)
 
 
-e2.grid(row=4, column=4)
+e2.grid(row=4, column=2)
 b = Button(imagespace1, text="Get Lyrics", command=lambda :getlyrics(e2.get()))
-b.grid(row=4, column=5)
+b.grid(row=4, column=4)
 
 
 
