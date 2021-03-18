@@ -92,7 +92,7 @@ def playsong():
     playground.selection_set(ACTIVE, last = None)
     e2.delete(0,END)
     e2.insert(END,song)
-    song = '/Users/pramodkhandelwal/github/PythonZankyo/Audio/' + song + '.mp3'
+    song = 'C:\Users\Anant\Documents\PythonZankyo-master\Audio\' + song + '.mp3' 
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops = 0)
 
@@ -217,6 +217,7 @@ def Rem1():
 def Clearplaylist():
     playground.delete(0,END)
     pygame.mixer.music.stop()
+
 
 def Themesetter(loop,playground,playbt,pausebt,nextbt,prevbt,stopbt,colscheme):
     if colscheme=="MONOCHROME":
